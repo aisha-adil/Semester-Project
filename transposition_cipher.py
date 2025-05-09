@@ -3,7 +3,6 @@
 # the  string to be encrypted is written under the keyword, transposed to be exact
 # then read in order of keywords as columns
 
-
 def key_sequence_generation_function(keyword):
     # takes in keywords and return list of numbers for column order
 
@@ -12,7 +11,7 @@ def key_sequence_generation_function(keyword):
 
     # 2. we sort the pairs based on the letter in alphabetical order,
     # pairs.sort(key=lambda x: x[0])
-    pairs.sort(key=lambda x: (x[0], x[1])) #  error3: sorting by character (alphabetically), then by original index to maintain stability
+    pairs.sort(key=lambda x: (x[0], x[1])) #  error1: sorting by character (alphabetically), then by original index to maintain stability
 
     # 3. return pairs in order they should be read in the transposition
     return [index for _, index in pairs]
@@ -29,7 +28,7 @@ def encryption_function(plaintext, keyword):
     num_rows = -(-len(plaintext) // num_columns)
 
     # 3. we create a matrix for the actual transposition
-    matrix = [["" for _ in range(num_columns)] for _ in range(num_rows)]
+    matrix = [[" " for _ in range(num_columns)] for _ in range(num_rows)]
 
     # 4. we fill the matrix with the plaintext, row by row
     text_index = 0
@@ -60,13 +59,13 @@ def decryption_function(cyphertext, keyword):
 
     # 3. we calculate number of filled positions in a transpoistion matrix
     num_filled_positions = len(cyphertext)
-    num_long_cols = num_filled_positions % num_columns
+    num_full_cols = num_filled_positions % num_columns
 
     # 4. we create matrix for the transposition
     matrix = [["" for _ in range(num_columns)] for _ in range(num_rows)]
 
     col_length = [num_rows] * num_columns   
-    for i in range(num_long_cols):
+    for i in range(num_full_cols):
         col_length[i] += 1
 
     # error2: transposition was faulty in case of repititive letters and indices were calulated wrong
@@ -79,6 +78,10 @@ def decryption_function(cyphertext, keyword):
     #         col_length[i] -= 1
 
     # 6. we fill transposition matrix with cyphertext, column by column for reverse transposition
+
+    # error3: decryption was faulty, the transposition was not done correctly in the matrix, columns to be left empty at the end were being filled.
+    # solution: added spaces in cyphertext where no letters, decryption is correct now but the encryption is not so secret anymore and decryption will not work with user input
+
     text_index = 0
     for col_index in key_sequence:
         for row in range(col_length[col_index]):
@@ -94,7 +97,7 @@ def decryption_function(cyphertext, keyword):
                 decrypted_text += matrix[i][j]
     return decrypted_text
 
-
+    
 def main():
     """
     Main function to run the columnar transposition cipher example.
