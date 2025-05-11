@@ -28,7 +28,7 @@ def encryption_function(plaintext, keyword):
     num_rows = -(-len(plaintext) // num_columns)
 
     # 3. we create a matrix for the actual transposition
-    matrix = [[" " for _ in range(num_columns)] for _ in range(num_rows)]
+    matrix = [["" for _ in range(num_columns)] for _ in range(num_rows)]
 
     # 4. we fill the matrix with the plaintext, row by row
     text_index = 0
@@ -47,63 +47,97 @@ def encryption_function(plaintext, keyword):
     return encrypted_text
 
 
-def decryption_function(cyphertext, keyword):
-    # takes in a string and keyword and returns the decrypted string
+# def decryption_function(cyphertext, keyword):
+#     # takes in a string and keyword and returns the decrypted string
 
-    # 1. we generate a key sequence using the key_sequence_generation_function
+#     # 1. we generate a key sequence using the key_sequence_generation_function
+#     key_sequence = key_sequence_generation_function(keyword)
+
+#     # 2. we calculate the number of rows and columns like in encryption function
+#     num_columns = len(keyword)
+#     num_rows = -(-len(cyphertext) // num_columns)
+
+#     # 3. we calculate number of filled positions in a transpoistion matrix
+#     num_filled_positions = len(cyphertext)
+#     num_full_cols = num_filled_positions % num_columns
+
+#     # 4. we create matrix for the transposition
+#     matrix = [["" for _ in range(num_columns)] for _ in range(num_rows)]
+
+#     col_length = [num_rows] * num_columns   
+#     for i in range(num_full_cols):
+#         col_length[i] += 1
+
+#     # error2: transposition was faulty in case of repititive letters and indices were calulated wrong
+#     # some lines of code were also removed from the encryption function to make this correct
+
+#     # # 5. we adjust for text that doesn't completely fill the transposition grid
+#     remaining = num_filled_positions % num_columns
+#     if remaining != 0:
+#         for i in range(remaining):
+#             col_length[i] -= 1
+
+#     # 6. we fill transposition matrix with cyphertext, column by column for reverse transposition
+
+#     # error3: decryption was faulty, the transposition was not done correctly in the matrix, columns to be left empty at the end were being filled.
+#     # solution: added spaces in cyphertext where no letters, decryption is correct now but the encryption is not so secret anymore and decryption will not work with user input
+
+#     text_index = 0
+#     for col_index in key_sequence:
+#         for row in range(col_length[col_index]):
+#             if text_index < len(cyphertext):
+#                 matrix[row][col_index] = cyphertext[text_index]
+#                 text_index += 1
+
+#     # 7. we create the decrypted text by reading the matrix row by row
+#     decrypted_text = ''
+#     for i in range(num_rows):
+#         for j in range(num_columns):
+#             if matrix[i][j] != '':
+#                 decrypted_text += matrix[i][j]
+#     return decrypted_text
+
+
+def decryption_function(ciphertext, keyword):
+    # Generate key sequence
     key_sequence = key_sequence_generation_function(keyword)
 
-    # 2. we calculate the number of rows and columns like in encryption function
+    # Calculate the number of rows and columns
     num_columns = len(keyword)
-    num_rows = -(-len(cyphertext) // num_columns)
+    num_rows = -(-len(ciphertext) // num_columns)  # Ceiling division
 
-    # 3. we calculate number of filled positions in a transpoistion matrix
-    num_filled_positions = len(cyphertext)
-    num_full_cols = num_filled_positions % num_columns
+    # Calculate the number of fully filled columns
+    num_full_cols = len(ciphertext) % num_columns
 
-    # 4. we create matrix for the transposition
+    # Initialize matrixF to keep track of column lengths
+    matrixF = [num_rows] * num_columns
+    for i in range(num_full_cols):
+        matrixF[i] += 1
+
+    # Create the transposition matrix
     matrix = [["" for _ in range(num_columns)] for _ in range(num_rows)]
 
-    col_length = [num_rows] * num_columns   
-    for i in range(num_full_cols):
-        col_length[i] += 1
-
-    # error2: transposition was faulty in case of repititive letters and indices were calulated wrong
-    # some lines of code were also removed from the encryption function to make this correct
-
-    # # 5. we adjust for text that doesn't completely fill the transposition grid
-    # remaining = num_filled_positions % num_columns
-    # if remaining != 0:
-    #     for i in range(remaining):
-    #         col_length[i] -= 1
-
-    # 6. we fill transposition matrix with cyphertext, column by column for reverse transposition
-
-    # error3: decryption was faulty, the transposition was not done correctly in the matrix, columns to be left empty at the end were being filled.
-    # solution: added spaces in cyphertext where no letters, decryption is correct now but the encryption is not so secret anymore and decryption will not work with user input
-
+    # Fill the matrix column by column using the key sequence
     text_index = 0
     for col_index in key_sequence:
-        for row in range(col_length[col_index]):
-            if text_index < len(cyphertext):
-                matrix[row][col_index] = cyphertext[text_index]
+        max_row = min(matrixF[col_index], num_rows)
+        for row in range(max_row):
+            if text_index < len(ciphertext):
+                matrix[row][col_index] = ciphertext[text_index]
                 text_index += 1
 
-    # 7. we create the decrypted text by reading the matrix row by row
+    # Read the matrix row by row to construct the decrypted text
     decrypted_text = ''
-    for i in range(num_rows):
-        for j in range(num_columns):
-            if matrix[i][j] != '':
-                decrypted_text += matrix[i][j]
-    return decrypted_text
+    for row in matrix:
+        decrypted_text += ''.join(row)
 
-    
+    return decrypted_text
 def main():
     """
     Main function to run the columnar transposition cipher example.
     """
-    plaintext = "TRANSPOSITIONCIPHER"
-    keyword = "SECRET"
+    plaintext = "HELLO @WORLD!"
+    keyword = "CIPHER"
 
     # Encryption
     ciphertext = encryption_function(plaintext, keyword)
